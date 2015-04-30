@@ -58,7 +58,7 @@ describe Rack::OAuth2::Server::Token do
     its(:body)         { should include '"error":"unsupported_grant_type"' }
   end
 
-  [:client_id, :grant_type].each do |required|
+  [:grant_type].each do |required|
     context "when #{required} is missing" do
       before do
         params.delete_if do |key, value|

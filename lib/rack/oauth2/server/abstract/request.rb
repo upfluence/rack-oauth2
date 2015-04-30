@@ -4,7 +4,7 @@ module Rack
       module Abstract
         class Request < Rack::Request
           include AttrRequired, AttrOptional
-          attr_required :client_id
+          attr_optional :client_id
           attr_optional :scope
 
           def initialize(env)
