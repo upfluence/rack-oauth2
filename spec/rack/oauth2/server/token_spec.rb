@@ -58,7 +58,7 @@ describe Rack::OAuth2::Server::Token do
     its(:body)         { should include '"error":"unsupported_grant_type"' }
   end
 
-  [:client_id, :grant_type].each do |required|
+  [:grant_type].each do |required|
     context "when #{required} is missing" do
       before do
         params.delete_if do |key, value|
@@ -72,6 +72,15 @@ describe Rack::OAuth2::Server::Token do
   end
 
   context 'when client_id is given via JWT client assertion' do
+    let(:app) do
+      Rack::OAuth2::Server::Token.new do |request, response|
+        response.access_token = Rack::OAuth2::AccessToken::Bearer.new(
+          access_token: 'access_token',
+          optionals: { client_id: request.client_id }
+        )
+      end
+    end
+
     before do
       require 'json/jwt'
       params[:client_assertion] = JSON::JWT.new(
@@ -82,31 +91,33 @@ describe Rack::OAuth2::Server::Token do
       params.delete(:client_id)
     end
 
+    # NOTE: client_id is optional, so the request reaches the authenticator
+    #  without client_id and the authenticator is responsible for rejecting it.
     context 'when client_assertion is invalid JWT' do
       before do
         params[:client_assertion] = 'invalid-jwt'
       end
-      its(:status)       { should == 400 }
+      its(:status)       { should == 200 }
       its(:content_type) { should == 'application/json' }
-      its(:body)         { should include '"error":"invalid_request"' }
+      its(:body)         { should_not include '"client_id"' }
     end
 
     context 'when client_assertion_type is missing' do
       before do
         params.delete(:client_assertion_type)
       end
-      its(:status)       { should == 400 }
+      its(:status)       { should == 200 }
       its(:content_type) { should == 'application/json' }
-      its(:body)         { should include '"error":"invalid_request"' }
+      its(:body)         { should_not include '"client_id"' }
     end
 
     context 'when client_assertion_type is unknown' do
       before do
         params[:client_assertion_type] = 'unknown'
       end
-      its(:status)       { should == 400 }
+      its(:status)       { should == 200 }
       its(:content_type) { should == 'application/json' }
-      its(:body)         { should include '"error":"invalid_request"' }
+      its(:body)         { should_not include '"client_id"' }
     end
 
     context 'when client_assertion issuer is different from client_id' do
@@ -122,6 +133,7 @@ describe Rack::OAuth2::Server::Token do
       its(:status)       { should == 200 }
       its(:content_type) { should == 'application/json' }
       its(:body)         { should include '"access_token":"access_token"' }
+      its(:body)         { should include '"client_id":"client_id"' }
     end
   end
 
