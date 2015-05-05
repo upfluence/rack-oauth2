@@ -2,8 +2,8 @@ module Rack
   module OAuth2
     class AccessToken
       include AttrRequired, AttrOptional
-      attr_required :access_token, :token_type
-      attr_optional :refresh_token, :expires_in, :scope
+      attr_required :access_token, :token_type, :httpclient
+      attr_optional :refresh_token, :expires_in, :scope, :optionals
       attr_accessor :raw_attributes
       delegate :get, :patch, :post, :put, :delete, to: :httpclient
 
@@ -24,14 +24,14 @@ module Rack
         end
       end
 
-      def token_response(options = {})
+      def token_response(_options = {})
         {
           access_token: access_token,
           refresh_token: refresh_token,
           token_type: token_type,
           expires_in: expires_in,
           scope: Array(scope).join(' ')
-        }
+        }.merge(optionals || {})
       end
     end
   end
