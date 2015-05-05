@@ -76,5 +76,18 @@ describe Rack::OAuth2::AccessToken do
 
       its(:raw_attributes) { should include :ex_key }
     end
+
+    context 'with optionals' do
+      let!(:optionals) { { user_id: 'ofjgizohjvizg909809fheoifzhf' } }
+
+      it 'should contain optional field' do
+        expect(
+          Rack::OAuth2::AccessToken::Bearer.new(
+            access_token: 'access_token',
+            optionals: optionals
+          ).token_response
+        ).to include({ user_id: 'ofjgizohjvizg909809fheoifzhf' })
+      end
+    end
   end
 end
