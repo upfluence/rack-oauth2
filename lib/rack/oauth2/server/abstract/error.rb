@@ -3,7 +3,7 @@ module Rack
     module Server
       module Abstract
         class Error < StandardError
-          attr_accessor :status, :error, :description, :uri, :realm, :resource_metadata
+          attr_accessor :status, :error, :description, :uri, :realm, :resource_metadata, :custom_fields
 
           def initialize(status, error, description = nil, options = {})
             @status      = status
@@ -12,6 +12,7 @@ module Rack
             @uri         = options[:uri]
             @realm       = options[:realm]
             @resource_metadata = options[:resource_metadata]
+            @custom_fields = options[:custom_fields] || {}
             super [error, description].compact.join(' :: ')
           end
 
@@ -29,7 +30,7 @@ module Rack
             yield response if block_given?
             unless response.redirect?
               response.headers['Content-Type'] = 'application/json'
-              response.write Util.compact_hash(protocol_params).to_json
+              response.write Util.compact_hash(protocol_params.merge(@custom_fields)).to_json
             end
             response.finish
           end
