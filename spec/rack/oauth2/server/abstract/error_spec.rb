@@ -6,10 +6,31 @@ describe Rack::OAuth2::Server::Abstract::Error do
     subject do
       Rack::OAuth2::Server::Abstract::Error.new 400, :invalid_request, 'Missing some required params', :uri => 'http://server.example.com/error'
     end
+
     its(:status)      { should == 400 }
     its(:error)       { should == :invalid_request }
     its(:description) { should == 'Missing some required params' }
     its(:uri)         { should == 'http://server.example.com/error' }
+    its(:protocol_params) do
+      should == {
+        :error             => :invalid_request,
+        :error_description => 'Missing some required params',
+        :error_uri         => 'http://server.example.com/error'
+      }
+    end
+  end
+
+  context 'when full attributes and custom_fields are given' do
+    let(:custom_fields) { { foo: 'bar', bar: 'bu' } }
+
+    subject do
+      Rack::OAuth2::Server::Abstract::Error.new 400, :invalid_request, 'Missing some required params', :uri => 'http://server.example.com/error', :custom_fields => custom_fields
+    end
+    its(:status)      { should == 400 }
+    its(:error)       { should == :invalid_request }
+    its(:description) { should == 'Missing some required params' }
+    its(:uri)         { should == 'http://server.example.com/error' }
+    its(:custom_fields)   { should == custom_fields }
     its(:protocol_params) do
       should == {
         :error             => :invalid_request,
