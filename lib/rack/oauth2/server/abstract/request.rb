@@ -3,9 +3,21 @@ module Rack
     module Server
       module Abstract
         class Request < Rack::Request
+          JSON_CONTENT_TYPE = 'application/json'
+
           include AttrRequired, AttrOptional
           attr_optional :client_id
           attr_optional :scope
+
+          def params
+            @params ||= if content_type == JSON_CONTENT_TYPE
+                          payload = body.read
+                          body.rewind
+                          JSON.parse(payload)
+                        else
+                          super
+                        end
+          end
 
           def initialize(env)
             super
