@@ -45,6 +45,10 @@ module Rack
           def unauthorized!(error, description = nil, options = {})
             raise Unauthorized.new(error, description, options)
           end
+
+          def forbidden!(error, description = nil, options = {})
+            raise Forbidden.new(error, description, options)
+          end
         end
 
         Request.send :include, ErrorMethods
