@@ -5,6 +5,9 @@ module Rack
         class BadRequest < Abstract::BadRequest
         end
 
+        class Forbidden < Abstract::Forbidden
+        end
+
         class Unauthorized < Abstract::Unauthorized
           def finish
             super do |response|
